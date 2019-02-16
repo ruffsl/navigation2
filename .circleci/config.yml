@@ -229,7 +229,7 @@ workflows:
       - debug_build
       - release_build:
           requires:
-            - build
+            - debug_build
           filters:
             branches:
               only: master
