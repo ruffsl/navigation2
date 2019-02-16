@@ -55,6 +55,9 @@ RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
       --cmake-args \
         -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE
 
+# delete ignore files so rosdep may resolve dependencies
+RUN rm $NAV2_WS/src/navigation2/nav2_system_tests/COLCON_IGNORE
+
 # install navigation2 package dependencies
 WORKDIR $NAV2_WS
 RUN . $ROS_WS/install/setup.sh && \
@@ -67,7 +70,6 @@ RUN . $ROS_WS/install/setup.sh && \
     && rm -rf /var/lib/apt/lists/*
 
 # build navigation2 package source
-RUN rm $NAV2_WS/src/navigation2/nav2_system_tests/COLCON_IGNORE
 ARG COVERAGE_ENABLED=False
 RUN . $ROS_WS/install/setup.sh && \
      colcon build \
