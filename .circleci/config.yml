@@ -196,7 +196,7 @@ executors:
     parameters:
       image_tag:
         type: string
-        default: master
+        default: $CIRCLE_BRANCH
     docker:
       - image: rosplanning/navigation2:<< parameters.image_tag >>
     working_directory: /opt/nav2_ws
@@ -206,10 +206,6 @@ executors:
 jobs:
   debug_build:
     executor: docker_exec
-    parameters:
-      image_tag:
-        type: string
-        default: $CIRCLE_BRANCH
     environment:
       CMAKE_BUILD_TYPE: "Debug"
       COVERAGE_ENABLED: "True"
@@ -221,10 +217,6 @@ jobs:
       - report_coverage
   release_build:
     executor: docker_exec
-    parameters:
-      image_tag:
-        type: string
-        default: $CIRCLE_BRANCH
     environment:
       CMAKE_BUILD_TYPE: "Release"
       COVERAGE_ENABLED: "False"
