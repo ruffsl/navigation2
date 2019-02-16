@@ -227,7 +227,12 @@ workflows:
   build-test:
     jobs:
       - debug_build
-      - release_build
+      - release_build:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
   # nightly:
   #   triggers:
   #     - schedule:
@@ -237,4 +242,14 @@ workflows:
   #             only:
   #               - master
   #   jobs:
-  #     - build
+  #     - release_build
+  # weekly:
+  #   triggers:
+  #     - schedule:
+  #         cron: "0 0 * * 0"
+  #         filters:
+  #           branches:
+  #             only:
+  #               - /^.*-devel$
+  #   jobs:
+  #     - release_build
