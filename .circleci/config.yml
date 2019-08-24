@@ -371,16 +371,16 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test:
-    jobs:
-      - debug_build
-      - debug_test:
-          requires:
-            - debug_build
-      - release_build
-      - release_test:
-          requires:
-            - release_build
+  # build_and_test:
+  #   jobs:
+  #     - debug_build
+  #     - debug_test:
+  #         requires:
+  #           - debug_build
+  #     - release_build
+  #     - release_test:
+  #         requires:
+  #           - release_build
   nightly:
     jobs:
       - debug_build
