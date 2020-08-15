@@ -141,7 +141,7 @@ _commands:
                 colcon list --names-only | \
                   circleci tests split \
                     --split-by=timings \
-                    --timings-type=classname \
+                    --timings-type=filename \
                     --show-counts | \
                   xargs)
               set -o xtrace
