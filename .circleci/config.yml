@@ -142,6 +142,8 @@ _commands:
         workspace:
           type: string
       steps:
+        - store_artifacts:
+            path: /.circleci-task-data/circle-test-results/results.json
         - run:
             name: Test Workspace | << parameters.workspace >>
             working_directory: << parameters.workspace >>
