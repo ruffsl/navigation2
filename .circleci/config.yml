@@ -349,7 +349,7 @@ _jobs:
       rmw:
         default: "rmw_fastrtps_cpp"
         type: string
-    parallelism: 1
+    parallelism: 2
     environment:
       RMW_IMPLEMENTATION: << parameters.rmw >>
 
