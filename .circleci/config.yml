@@ -163,6 +163,7 @@ _commands:
                 --ctest-args --test-regex "test_.*"
               colcon test-result \
                 --verbose
+            no_output_timeout: 30m
         - run:
             name: Copy Test Logs
             working_directory: << parameters.workspace >>
