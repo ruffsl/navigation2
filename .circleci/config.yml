@@ -60,7 +60,7 @@ _commands:
               sha256sum $PWD/checksum.txt >> checksum.txt
               apt-get update
               rosdep update
-              
+
               # workarround for OMPL and rosdep
               # https://github.com/ompl/ompl/issues/753
               # Prevent searching $ROS_WS/install given it's too big for rosdep
@@ -77,9 +77,7 @@ _commands:
                   --from-paths src \
                     $underlay_ws \
                   --ignore-src \
-                  --skip-keys " \
-                    slam_toolbox \
-                    " \
+                  --skip-keys "$(cat skip_keys.txt | xargs)" \
                   --verbose | \
                 awk '$1 ~ /^resolution\:/' | \
                 awk -F'[][]' '{print $2}' | \

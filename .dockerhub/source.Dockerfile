@@ -15,7 +15,7 @@
 # Use `--no-cache` to break the local docker build cache.
 # Use `--pull` to pull the latest parent image from the remote registry.
 # Use `--target=<stage_name>` to build stages not used for final stage.
-# 
+#
 # We're only building on top of a ros2 devel image to get the basics
 # prerequisites installed such as the apt source, rosdep, etc. We don't want to
 # actually use any of the ros release packages. Instead we are going to build
@@ -35,6 +35,7 @@ WORKDIR $ROS2_WS/src
 RUN git clone $ROS2_REPO -b $ROS2_BRANCH && \
     vcs import ./ < ros2/ros2.repos && \
     find ./ -name ".git" | xargs rm -rf
+COPY ./tools/source/skip_keys.txt ../
 
 # clone underlay source
 ARG UNDERLAY_WS
@@ -42,12 +43,14 @@ WORKDIR $UNDERLAY_WS/src
 COPY ./tools/underlay.repos ../
 RUN vcs import ./ < ../underlay.repos && \
     find ./ -name ".git" | xargs rm -rf
+COPY ./tools/source/skip_keys.txt ../
 
 # copy overlay source
 ARG OVERLAY_WS
 WORKDIR $OVERLAY_WS/src
 COPY ./ ./ros-planning/navigation2
 RUN colcon list --names-only | cat >> /opt/packages.txt
+COPY ./tools/source/skip_keys.txt ../
 
 # remove skiped packages
 WORKDIR /opt
@@ -64,7 +67,9 @@ RUN find ./ \
 # copy manifests for caching
 RUN mkdir -p /tmp/opt && \
     find ./ -name "package.xml" | \
-      xargs cp --parents -t /tmp/opt
+      xargs cp --parents -t /tmp/opt && \
+    find ./ -name "skip_keys.txt" | \
+      xargs cp --parents -t /tmp/opt || true
 
 # multi-stage for ros2 dependencies
 FROM $FROM_IMAGE AS ros2_depender
@@ -90,15 +95,12 @@ ENV ROS_VERSION=2 \
 # install ros2 dependencies
 WORKDIR $ROS2_WS
 COPY --from=cacher /tmp/$ROS2_WS ./
-COPY ./tools/skip_keys.txt /tmp/
 RUN --mount=type=cache,target=/var/cache/apt \
     --mount=type=cache,target=/var/lib/apt \
     apt-get update && rosdep install -q -y \
       --from-paths src \
       --ignore-src \
-      --skip-keys " \
-        $(cat /tmp/skip_keys.txt | xargs) \
-        "
+      --skip-keys "$(cat skip_keys.txt | xargs)"
 
 # multi-stage for building ros2
 FROM ros2_depender AS ros2_builder
@@ -140,9 +142,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
       --from-paths src \
         $ROS2_WS/src \
       --ignore-src \
-      --skip-keys " \
-        $(cat /tmp/skip_keys.txt | xargs) \
-      "
+      --skip-keys "$(cat skip_keys.txt | xargs)"
 
 # multi-stage for building underlay
 FROM underlay_depender AS underlay_builder
@@ -190,9 +190,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
         $ROS2_WS/src \
         $UNDERLAY_WS/src \
       --ignore-src \
-      --skip-keys " \
-        $(cat /tmp/skip_keys.txt | xargs) \
-      "
+      --skip-keys "$(cat skip_keys.txt | xargs)"
 
 # multi-stage for building overlay
 FROM overlay_depender AS overlay_builder

@@ -19,11 +19,13 @@ WORKDIR $UNDERLAY_WS/src
 COPY ./tools/underlay.repos ../
 RUN vcs import ./ < ../underlay.repos && \
     find ./ -name ".git" | xargs rm -rf
+COPY ./tools/distro/skip_keys.txt ../
 
 # copy overlay source
 ARG OVERLAY_WS
 WORKDIR $OVERLAY_WS/src
 COPY ./ ./navigation2
+COPY ./tools/distro/skip_keys.txt ../
 
 # copy manifests for caching
 WORKDIR /opt
@@ -31,6 +33,8 @@ RUN mkdir -p /tmp/opt && \
     find ./ -name "package.xml" | \
       xargs cp --parents -t /tmp/opt && \
     find ./ -name "COLCON_IGNORE" | \
+      xargs cp --parents -t /tmp/opt || true && \
+    find ./ -name "skip_keys.txt" | \
       xargs cp --parents -t /tmp/opt || true
 
 # multi-stage for building
@@ -55,9 +59,7 @@ COPY --from=cacher /tmp/$UNDERLAY_WS ./
 RUN . /opt/ros/$ROS_DISTRO/setup.sh && \
     apt-get update && rosdep install -q -y \
       --from-paths src \
-      --skip-keys " \
-        slam_toolbox \
-        " \
+      --skip-keys "$(cat skip_keys.txt | xargs)" \
       --ignore-src \
     && rm -rf /var/lib/apt/lists/*
 
@@ -80,9 +82,7 @@ RUN . $UNDERLAY_WS/install/setup.sh && \
     apt-get update && rosdep install -q -y \
       --from-paths src \
         $UNDERLAY_WS/src \
-      --skip-keys " \
-        slam_toolbox \
-        "\
+      --skip-keys "$(cat skip_keys.txt | xargs)" \
       --ignore-src \
     && rm -rf /var/lib/apt/lists/*
 
