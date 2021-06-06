@@ -51,6 +51,7 @@ RUN apt-get update && \
     apt-get install -y \
       ccache \
       lcov \
+      python3-colcon-lcov-result \
       python3-pip \
       ros-$ROS_DISTRO-rmw-fastrtps-cpp \
       ros-$ROS_DISTRO-rmw-connextdds \
